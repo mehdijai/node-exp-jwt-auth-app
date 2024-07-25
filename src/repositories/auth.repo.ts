@@ -17,7 +17,7 @@ import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import prisma from '@/services/prisma.service';
 import appConfig from '@/config/app.config';
-import { addTime } from '@/utils/herlpers';
+import { addTime } from '@/utils/helpers';
 
 // TODO: Convert to class
 

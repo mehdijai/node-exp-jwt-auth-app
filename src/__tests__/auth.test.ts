@@ -4,7 +4,7 @@ import appConfig, { parseAPIVersion } from '@/config/app.config';
 import { truncateAllTables } from '@/utils/truncateDB';
 import HttpStatusCode from '@/utils/HTTPStatusCodes';
 import { logger } from '@/utils/winston';
-import wait from '@/utils/herlpers';
+import wait from '@/utils/helpers';
 import * as nodemailer from 'nodemailer';
 import { NodemailerMock } from 'nodemailer-mock';
 import { getTokenFromMail } from '@/utils/mailerUtils';
