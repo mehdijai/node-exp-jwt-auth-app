@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  DOCTOR
+  PATIENT
+  ADMIN
+}
+
+model User {
+  id                 String              @id @unique @default(uuid())
+  name               String
+  email              String              @unique
+  phone              String              @unique
+  password           String
+  verifiedEmail      Boolean             @default(false)
+  userType           UserType
+  refreshToken       RefreshToken[]
+  resetPasswordToken ResetPasswordToken?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  verifyEmailToken   VerifyEmailToken?
+
+  @@map("users")
+}
+
+model ResetPasswordToken {
+  id        String   @id @unique @default(uuid())
+  token     String   @unique
+  expiresAt DateTime
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("reset_password_tokens")
+}
+
+model VerifyEmailToken {
+  id        String   @id @unique @default(uuid())
+  token     String   @unique
+  expiresAt DateTime
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("verify_email_tokens")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("refresh_tokens")
+}
