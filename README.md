@@ -46,3 +46,25 @@ npm run format
 
 Throughout the auth process, we send emails to Verify User Email, reset password and other business processes. I used for this demo [MailTrap](https://mailtrap.io) as test mail provider, NodeMailer to send email and Nodemailer-mock to test the email sending and reading them.
 *Details will be in the article*
+
+## Architecture and process
+
+### Register Process
+
+<img src="./assets/nodexp-auth-register.png" alt="Register" width="60%"/>
+
+### Login Process
+
+<img src="./assets/nodexp-auth-login.png" alt="Login" width="60%"/>
+
+### Refresh Token Process
+
+<img src="./assets/nodexp-auth-refresh-token.png" alt="Refresh Token" width="60%"/>
+
+### Update password Process
+
+<img src="./assets/nodexp-auth-update-password.png" alt="Update Password" width="60%"/>
+
+### Reset password Process
+
+<img src="./assets/nodexp-auth-reset-password.png" alt="Reset Password" width="60%"/>
