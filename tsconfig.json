@@ -1,4 +1,10 @@
 {
+  "ts-node": {
+    "files": true
+  },
+  "files": [
+    "src/types/auth.d.ts"
+  ],
   "compilerOptions": {
     "target": "es6",
     "module": "CommonJS",
@@ -21,7 +27,7 @@
     },
     "typeRoots": ["./node_modules/@types", "./src/types"]
   },
-  "types": ["src/index.d.ts"],
+  "types": ["src/index.d.ts", "src/types/auth.d.ts"],
   "include": ["src/**/**/*.ts"],
   "exclude": ["node_modules", "public"]
 }

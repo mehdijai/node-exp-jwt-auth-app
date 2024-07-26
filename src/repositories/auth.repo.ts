@@ -60,6 +60,7 @@ export async function loginUser(payload: TAuthSchema): Promise<ApiResponseBody<I
           email: user.email,
           phone: user.phone,
           name: user.name,
+          verifiedEmail: user.verifiedEmail,
           userType: user.userType,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
@@ -135,6 +136,7 @@ export async function createUser(payload: TRegisterSchema): Promise<ApiResponseB
       email: user.email,
       phone: user.phone,
       name: user.name,
+      verifiedEmail: user.verifiedEmail,
       userType: user.userType,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
@@ -244,6 +246,9 @@ export async function resetPassword(
     const token = await prisma.resetPasswordToken.findUnique({
       where: {
         token: payload.token,
+        expiresAt: {
+          gte: new Date(),
+        },
       },
       include: {
         user: true,
@@ -429,6 +434,9 @@ export async function verifyUser(
     const token = await prisma.verifyEmailToken.findUnique({
       where: {
         token: payload.token,
+        expiresAt: {
+          gte: new Date(),
+        },
       },
       include: {
         user: true,
