@@ -160,7 +160,7 @@ async function sendEmailVerification(user: User) {
       data: {
         token,
         userId: user.id,
-        expiresAt: addTime(1, 'h'), // TODO: Fix Time conversions
+        expiresAt: addTime(1, 'h'),
       },
     });
 
@@ -236,7 +236,9 @@ export async function forgotPassword(
   }
   return resBody;
 }
-export async function resetPassword(payload: TResetPasswordSchema): Promise<ApiResponseBody<IStatusResponse>> {
+export async function resetPassword(
+  payload: TResetPasswordSchema
+): Promise<ApiResponseBody<IStatusResponse>> {
   const resBody = new ApiResponseBody<IStatusResponse>();
   try {
     const token = await prisma.resetPasswordToken.findUnique({
@@ -285,7 +287,9 @@ export async function resetPassword(payload: TResetPasswordSchema): Promise<ApiR
   }
   return resBody;
 }
-export async function updatePassword(payload: TUpdatePasswordSchema): Promise<ApiResponseBody<IStatusResponse>> {
+export async function updatePassword(
+  payload: TUpdatePasswordSchema
+): Promise<ApiResponseBody<IStatusResponse>> {
   const resBody = new ApiResponseBody<IStatusResponse>();
   try {
     const user = await prisma.user.findUnique({
@@ -312,14 +316,95 @@ export async function updatePassword(payload: TUpdatePasswordSchema): Promise<Ap
       return resBody;
     }
 
-    const hashedPassword = await bcrypt.hash(payload.newPassword, 10);
+    if (appConfig.updatePasswordRequireVerification) {
+      await sendConfirmPasswordUpdate(user, payload.newPassword);
+    } else {
+      const hashedPassword = await bcrypt.hash(payload.newPassword, 10);
+
+      await prisma.user.update({
+        where: {
+          id: payload.userId,
+        },
+        data: {
+          password: hashedPassword,
+        },
+      });
+    }
+    resBody.data = {
+      status: true,
+    };
+  } catch (err) {
+    logger.error(err);
+    resBody.error = {
+      code: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: String(err),
+    };
+  }
+  return resBody;
+}
+
+async function sendConfirmPasswordUpdate(user: User, newPassword: string) {
+  try {
+    const token = uuidv4();
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.updatePasswordToken.create({
+      data: {
+        token,
+        newPassword: hashedPassword,
+        userId: user.id,
+        expiresAt: addTime(1, 'h'),
+      },
+    });
+
+    const bodyHTML = `<h1>Confirm password update</h1>
+      <p>Confirm updating password. The link expires after <strong>1 hour</strong>.</p>
+      <a id="token-link" href="${process.env.CONFIRM_UPDATE_PASSWORD_EMAIL_UI_URL}/${token}">Confirm password</a><br>
+      or copy this link: <br>
+      <span>${process.env.CONFIRM_UPDATE_PASSWORD_EMAIL_UI_URL}/${token}</span>`;
+
+    sendEmail({
+      receivers: [user.email],
+      subject: 'Update Password',
+      html: bodyHTML,
+    });
+  } catch (err) {
+    logger.error({ message: 'Send password update Email Error:', error: err });
+  }
+}
+
+export async function confirmUpdatePassword(
+  payload: TValidateUserSchema
+): Promise<ApiResponseBody<IStatusResponse>> {
+  const resBody = new ApiResponseBody<IStatusResponse>();
+  try {
+    const token = await prisma.updatePasswordToken.findUnique({
+      where: {
+        token: payload.token,
+      },
+    });
+
+    if (!token) {
+      resBody.error = {
+        code: HttpStatusCode.FORBIDDEN,
+        message: 'Invalid or expired token',
+      };
+      return resBody;
+    }
 
     await prisma.user.update({
       where: {
-        id: payload.userId,
+        id: token.userId,
       },
       data: {
-        password: hashedPassword,
+        password: token.newPassword,
+      },
+    });
+
+    await prisma.updatePasswordToken.delete({
+      where: {
+        token: payload.token,
       },
     });
 
@@ -335,7 +420,10 @@ export async function updatePassword(payload: TUpdatePasswordSchema): Promise<Ap
   }
   return resBody;
 }
-export async function verifyUser(payload: TValidateUserSchema): Promise<ApiResponseBody<IStatusResponse>> {
+
+export async function verifyUser(
+  payload: TValidateUserSchema
+): Promise<ApiResponseBody<IStatusResponse>> {
   const resBody = new ApiResponseBody<IStatusResponse>();
   try {
     const token = await prisma.verifyEmailToken.findUnique({
