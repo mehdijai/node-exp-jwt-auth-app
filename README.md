@@ -2,6 +2,13 @@
 
 NodeJS / ExpressJS API with full tested Auth system using JWT
 
+Check out these articles. They explain this API in details:
+
+- [Part 1](https://mehdijai.hashnode.dev/node-exp-jwt-auth-system-part-1)
+- [Part 2](https://mehdijai.hashnode.dev/node-exp-jwt-auth-system-part-2)
+- [Part 3](https://mehdijai.hashnode.dev/node-exp-jwt-auth-system-part-3)
+- [Part 4](https://mehdijai.hashnode.dev/node-exp-jwt-auth-system-part-4)
+
 ## Testing
 
 The API uses different DB for testing. And after the test is done, The DB is truncated.
